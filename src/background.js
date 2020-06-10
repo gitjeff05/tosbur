@@ -30,7 +30,8 @@ function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: false, // if we set to true then we may have to use icpMain/
+      contextIsolation: true,
+      enableRemoteModule: false,
       preload: preloadPath
     }
   });
@@ -38,6 +39,10 @@ function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    // Alternatively, we can load a local server with jupyter running
+    // let url =
+    //   'http://127.0.0.1:8888/?token=1234';
+    // win.loadURL(url);
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol('app');
