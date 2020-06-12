@@ -1,17 +1,47 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <h1>{{ title }}</h1>
+    <h2 v-if="hasCont">There are some containers running</h2>
+    <button @click="getImages">get containers</button>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+const { tosbur } = window;
 
+/**
+ * Docker Engine API is a RESTful API accessed by an HTTP client such as wget or curl, or the HTTP library
+ */
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  data: () => ({
+    title: tosbur.title,
+    hasCont: false
+  }),
+  methods: {
+    getImages: () => {
+      tosbur
+        .getImages()
+        .then(f => {
+          /**
+           * Should this be a computed or method?
+           * https://vuejs.org/v2/guide/components-dynamic-async.html
+           */
+          console.log(f);
+        })
+        .catch(e => {
+          console.error(`There was an error fetchin images ${e}`);
+        });
+    }
+  },
+  computed: {
+    hasRunningContainers: () =>
+      tosbur.hasRunningContainers().then(h => {
+        /**
+         * Is this the right way to update a prop on the model?
+         */
+        this.hasCont = h;
+      })
   }
 };
 </script>
