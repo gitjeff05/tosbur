@@ -1,12 +1,19 @@
 <template>
   <div id="app">
     <h1>{{ title }}</h1>
-    <h2 v-if="hasCont">There are some containers running</h2>
-    <button @click="getImages">get containers</button>
+    <h2 v-if="containersCount > 0">There are some running containers.</h2>
+    <ul id="containers-list">
+      <li v-for="item in allImages" :key="item.Id">
+        {{ item.Id }}
+      </li>
+    </ul>
+    <button @click="getImages">get images</button>
+    <button @click="getContainers">get containers</button>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 const { tosbur } = window;
 
 /**
@@ -16,32 +23,29 @@ export default {
   name: 'App',
   data: () => ({
     title: tosbur.title,
-    hasCont: false
+    hasContainers: false,
+    hasImages: false
   }),
+  /**
+   * The difference between methods and computeds:
+   * computed properties are cached based on their reactive dependencies
+   */
   methods: {
-    getImages: () => {
-      tosbur
-        .getImages()
-        .then(f => {
-          /**
-           * Should this be a computed or method?
-           * https://vuejs.org/v2/guide/components-dynamic-async.html
-           */
-          console.log(f);
-        })
-        .catch(e => {
-          console.error(`There was an error fetchin images ${e}`);
-        });
+    getImages: function() {
+      this.$store.dispatch('getImagesAction');
+    },
+    getContainers: function() {
+      this.$store.dispatch('getContainersAction');
     }
   },
   computed: {
-    hasRunningContainers: () =>
-      tosbur.hasRunningContainers().then(h => {
-        /**
-         * Is this the right way to update a prop on the model?
-         */
-        this.hasCont = h;
-      })
+    // mix the getters into computed with object spread operator
+    ...mapGetters([
+      'allImages',
+      'imagesCount',
+      'allContainers',
+      'containersCount'
+    ])
   }
 };
 </script>

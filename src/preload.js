@@ -1,12 +1,5 @@
-const { spawn } = require('child_process');
 const { contextBridge } = require('electron');
 const got = require('got');
-
-const hasRunningContainers = async () => {
-  const containers = await getContainers();
-  console.log(`Seeing ${containers.length} containers.`);
-  return containers.length > 0 ? true : false;
-};
 
 const handleError = error => {
   const { response } = error;
@@ -39,7 +32,6 @@ async function getContainers() {
 
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
-  hasRunningContainers,
   getContainers,
   title: 'Tosbur'
 });
