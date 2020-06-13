@@ -1,4 +1,4 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 const got = require('got');
 
 const handleError = error => {
@@ -30,8 +30,13 @@ async function getContainers() {
   }
 }
 
+function sendPing() {
+  ipcRenderer.send('asynchronous-message', 'ping');
+}
+
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
   getContainers,
+  sendPing,
   title: 'Tosbur'
 });

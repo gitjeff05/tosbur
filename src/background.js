@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-import { app, protocol, BrowserWindow } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import {
   createProtocol,
   installVueDevtools
@@ -15,6 +15,10 @@ let win;
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
+
+ipcMain.on('asynchronous-message', (event, arg) => {
+  console.log(`Received msg: ${arg} in main process`);
+});
 
 function createWindow() {
   // Create the browser window.

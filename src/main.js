@@ -49,6 +49,9 @@ const store = new Vuex.Store({
         .catch(e => {
           console.error(`There was an error fetching containers ${e}`);
         });
+    },
+    sendTestMsg() {
+      return tosbur.sendPing();
     }
   }
 });

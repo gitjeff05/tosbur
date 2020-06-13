@@ -9,6 +9,7 @@
     </ul>
     <button @click="getImages">get images</button>
     <button @click="getContainers">get containers</button>
+    <button @click="ping">ping</button>
   </div>
 </template>
 
@@ -36,7 +37,11 @@ export default {
     },
     getContainers: function() {
       this.$store.dispatch('getContainersAction');
+    },
+    ping: function() {
+      this.$store.dispatch('sendTestMsg');
     }
+
   },
   computed: {
     // mix the getters into computed with object spread operator
