@@ -12,13 +12,15 @@ const { tosbur } = window;
 const store = new Vuex.Store({
   state: {
     images: [],
+    starting: false,
     containers: []
   },
   getters: {
     allImages: state => state.images,
     allContainers: state => state.containers,
     imagesCount: (state, getters) => getters.allImages.length,
-    containersCount: (state, getters) => getters.allContainers.length
+    containersCount: (state, getters) => getters.allContainers.length,
+    containerStarting: state => state.starting
   },
   mutations: {
     saveImages(state, images) {
@@ -26,6 +28,10 @@ const store = new Vuex.Store({
     },
     saveContainers(state, containers) {
       state.containers = containers;
+    },
+    containerCreated(state, container) {
+      state.starting = true;
+      state.startingContainer = container;
     }
   },
   actions: {
@@ -52,6 +58,16 @@ const store = new Vuex.Store({
     },
     sendTestMsg() {
       return tosbur.sendPing();
+    },
+    createContainerAction({ commit }) {
+      return tosbur
+        .createContainer()
+        .then(f => {
+          commit('containerCreated', f);
+        })
+        .catch(e => {
+          console.error(`There was an error creating container ${e}`);
+        });
     }
   }
 });

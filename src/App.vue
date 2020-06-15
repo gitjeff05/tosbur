@@ -1,15 +1,21 @@
 <template>
   <div id="app">
     <h1>{{ title }}</h1>
-    <h2 v-if="containersCount > 0">There are some running containers.</h2>
     <ul id="containers-list">
       <li v-for="item in allImages" :key="item.Id">
         {{ item.Id }}
       </li>
     </ul>
+    <h2 v-if="containersCount > 0">Containers</h2>
+    <ul id="containers-list">
+      <li v-for="item in allContainers" :key="item.Id">
+        {{ item.Id.slice(0, 10) }}
+      </li>
+    </ul>
+    <span v-if="containerStarting">Loading</span>
     <button @click="getImages">get images</button>
     <button @click="getContainers">get containers</button>
-    <button @click="ping">ping</button>
+    <button @click="createContainer">create container</button>
   </div>
 </template>
 
@@ -40,8 +46,10 @@ export default {
     },
     ping: function() {
       this.$store.dispatch('sendTestMsg');
+    },
+    createContainer: function() {
+      this.$store.dispatch('createContainerAction');
     }
-
   },
   computed: {
     // mix the getters into computed with object spread operator
@@ -49,7 +57,8 @@ export default {
       'allImages',
       'imagesCount',
       'allContainers',
-      'containersCount'
+      'containersCount',
+      'containerStarting'
     ])
   }
 };
