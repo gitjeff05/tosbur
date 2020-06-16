@@ -16,7 +16,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
 
-ipcMain.on('asynchronous-message', (event, arg) => {
+ipcMain.on('open-jupyter', (event, arg) => {
   console.log(`Received msg: ${arg} in main process`);
 });
 
@@ -24,7 +24,7 @@ function createWindow() {
   // Create the browser window.
   const preloadPath = path.join(__dirname, 'preload.js');
   win = new BrowserWindow({
-    width: 1800,
+    width: 2400,
     height: 1024,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -96,7 +96,7 @@ app.on('ready', async () => {
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
-    process.on('message', data => {
+    process.on('message', (data) => {
       if (data === 'graceful-exit') {
         app.quit();
       }

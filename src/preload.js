@@ -1,8 +1,29 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const got = require('got');
 
-const handleError = error => {
-  const { response } = error;
+/**
+ * Generate a generic error in the format that handleError expects
+ * @param {String} message
+ * @param {String} url
+ */
+const generateError = (message, url) =>
+  JSON.stringify({
+    response: {
+      url,
+      body: JSON.stringify({
+        message
+      })
+    }
+  });
+
+/**
+ * Print out a nice error from the response object and rethrow
+ * @param {Object} error
+ */
+const handleError = (error) => {
+  let response = error.response
+    ? error.response
+    : JSON.parse(error.message).response;
   const body = JSON.parse(response.body);
   const errorMsg = `${body.message} ${response.url}`;
   console.error(`API error ${errorMsg}`);
@@ -60,36 +81,38 @@ async function createContainer() {
         json: imageSettings
       }
     );
-    console.log(body);
-    console.log(JSON.parse(body));
     return JSON.parse(body);
   } catch (error) {
     handleError(error);
   }
 }
 
-async function startContainer({ containerId }) {
+async function startContainer(container) {
+  const { Id } = container;
   try {
-    console.log('attempt to create container', imageSettings);
-    const { body } = await got.post(
-      `${process.env.DOCKER_IPC_SOCKET}/containers/${containerId}/start`
+    console.log(`starting container: ${Id}`);
+    const { statusCode, complete, requestUrl } = await got.post(
+      `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/start`
     );
-    console.log(body);
-    console.log(JSON.parse(body));
-    return JSON.parse(body);
+    if (statusCode === 204 && complete) {
+      return { Id, statusCode, complete };
+    }
+    throw new Error(
+      generateError(`Start container returned status ${statusCode}`, requestUrl)
+    );
   } catch (error) {
     handleError(error);
   }
 }
 
-function sendPing() {
-  ipcRenderer.send('asynchronous-message', 'ping');
+async function openNewBrowserInstance(container) {
+  ipcRenderer.send('open-jupyter', JSON.stringify(container));
 }
 
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
   getContainers,
-  sendPing,
+  openNewBrowserInstance,
   createContainer,
   startContainer,
   title: 'Tosbur'

@@ -1,22 +1,39 @@
 <template>
-  <div id="app">
-    <h1>{{ title }}</h1>
-    <ul id="containers-list">
-      <li v-for="item in allImages" :key="item.Id">
-        {{ item.Id }}
-      </li>
-    </ul>
-    <h2 v-if="containersCount > 0">Containers</h2>
-    <ul id="containers-list">
-      <li v-for="item in allContainers" :key="item.Id">
-        {{ item.Id.slice(0, 10) }}
-      </li>
-    </ul>
-    <span v-if="containerStarting">Loading</span>
-    <button @click="getImages">get images</button>
-    <button @click="getContainers">get containers</button>
-    <button @click="createContainer">create container</button>
-  </div>
+  <section id="app" class="section top-nav has-background-dark">
+    <div class="container">
+      <!-- Main container -->
+      <nav class="level">
+        <!-- Left side -->
+        <div class="level-left">
+          <div class="level-item">
+            <h1 class="title has-text-weight-light has-text-bright">Tosbur</h1>
+          </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="level-right">
+          <div class="level-item">
+            <b-field>
+              <b-select placeholder="Select an image">
+                <option
+                  v-for="option in allImages"
+                  :value="option.id"
+                  :key="option.id"
+                >
+                  {{ option.name }}
+                </option>
+              </b-select>
+            </b-field>
+          </div>
+          <div class="level-item">
+            <b-button @click="createContainer" type="is-bright"
+              >Launch Container</b-button
+            >
+          </div>
+        </div>
+      </nav>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -38,16 +55,16 @@ export default {
    * computed properties are cached based on their reactive dependencies
    */
   methods: {
-    getImages: function() {
+    getImages: function () {
       this.$store.dispatch('getImagesAction');
     },
-    getContainers: function() {
+    getContainers: function () {
       this.$store.dispatch('getContainersAction');
     },
-    ping: function() {
+    ping: function () {
       this.$store.dispatch('sendTestMsg');
     },
-    createContainer: function() {
+    createContainer: function () {
       this.$store.dispatch('createContainerAction');
     }
   },
@@ -65,12 +82,78 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+// Import Bulma's core
+@import '~bulma/sass/utilities/_all';
+
+section.top-nav {
+  padding: 0.5em;
 }
+
+// Set your colors
+$primary: #2c003e;
+$primary-invert: findColorInvert($primary);
+$twitter: #4099ff;
+$twitter-invert: findColorInvert($twitter);
+$dark: #512b58;
+$dark-invert: findColorInvert($dark);
+$bright: #fe346e;
+$bright-invert: findColorInvert($bright);
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: (
+  'bright': (
+    $bright,
+    $primary
+  ),
+  'white': (
+    $white,
+    $black
+  ),
+  'black': (
+    $black,
+    $white
+  ),
+  'light': (
+    $light,
+    $light-invert
+  ),
+  'dark': (
+    $dark,
+    $dark-invert
+  ),
+  'primary': (
+    $primary,
+    $primary-invert
+  ),
+  'info': (
+    $info,
+    $info-invert
+  ),
+  'success': (
+    $success,
+    $success-invert
+  ),
+  'warning': (
+    $warning,
+    $warning-invert
+  ),
+  'danger': (
+    $danger,
+    $danger-invert
+  ),
+  'twitter': (
+    $twitter,
+    $twitter-invert
+  )
+);
+
+// Links
+$link: $primary;
+$link-invert: $primary-invert;
+$link-focus-border: $primary;
+$button-hover-bright: $white;
+
+// Import Bulma and Buefy styles
+@import '~bulma';
+@import '~buefy/src/scss/buefy';
 </style>

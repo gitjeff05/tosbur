@@ -2,8 +2,10 @@ import Vue from 'vue';
 import 'es6-promise/auto';
 import Vuex from 'vuex';
 import App from './App.vue';
+import Buefy from 'buefy';
 
 Vue.use(Vuex);
+Vue.use(Buefy);
 
 Vue.config.productionTip = false;
 
@@ -13,14 +15,18 @@ const store = new Vuex.Store({
   state: {
     images: [],
     starting: false,
-    containers: []
+    containers: [],
+    imageOptions: [
+      { name: 'jupyter/minimal-notebook', id: 0 },
+      { name: 'jupyter/scipy-notebook', id: 1 }
+    ]
   },
   getters: {
-    allImages: state => state.images,
-    allContainers: state => state.containers,
+    allImages: (state) => state.imageOptions,
+    allContainers: (state) => state.containers,
     imagesCount: (state, getters) => getters.allImages.length,
     containersCount: (state, getters) => getters.allContainers.length,
-    containerStarting: state => state.starting
+    containerStarting: (state) => state.starting
   },
   mutations: {
     saveImages(state, images) {
@@ -32,27 +38,30 @@ const store = new Vuex.Store({
     containerCreated(state, container) {
       state.starting = true;
       state.startingContainer = container;
+    },
+    containerStarted(state, container) {
+      state.started = container.Id;
     }
   },
   actions: {
     getImagesAction({ commit }) {
       return tosbur
         .getImages()
-        .then(f => {
+        .then((f) => {
           console.log(f);
           commit('saveImages', f);
         })
-        .catch(e => {
+        .catch((e) => {
           console.error(`There was an error fetching images ${e}`);
         });
     },
     getContainersAction({ commit }) {
       return tosbur
         .getContainers()
-        .then(f => {
+        .then((f) => {
           commit('saveContainers', f);
         })
-        .catch(e => {
+        .catch((e) => {
           console.error(`There was an error fetching containers ${e}`);
         });
     },
@@ -60,12 +69,22 @@ const store = new Vuex.Store({
       return tosbur.sendPing();
     },
     createContainerAction({ commit }) {
+      console.log('createContainerAction');
       return tosbur
         .createContainer()
-        .then(f => {
+        .then((f) => {
           commit('containerCreated', f);
+          return f;
         })
-        .catch(e => {
+        .then(tosbur.startContainer)
+        .then((f) => {
+          console.log('container started');
+          console.log(f);
+          commit('containerStarted', f);
+          return f;
+        })
+        .then(tosbur.openNewBrowserInstance)
+        .catch((e) => {
           console.error(`There was an error creating container ${e}`);
         });
     }
@@ -73,6 +92,6 @@ const store = new Vuex.Store({
 });
 
 new Vue({
-  render: h => h(App),
+  render: (h) => h(App),
   store
 }).$mount('#app');
