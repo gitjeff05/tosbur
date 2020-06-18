@@ -1,43 +1,55 @@
 <template>
-  <section id="app" class="section top-nav has-background-dark">
-    <div class="container">
-      <!-- Main container -->
-      <nav class="level">
-        <!-- Left side -->
-        <div class="level-left">
-          <div class="level-item">
-            <h1 class="title has-text-weight-light has-text-bright">Tosbur</h1>
+  <div class="container is-fluid is-paddingless">
+    <section
+      id="app"
+      class="section top-nav is-paddingless py-1 has-background-dark"
+    >
+      <div class="container">
+        <!-- Main container -->
+        <nav class="level">
+          <!-- Left side -->
+          <div class="level-left">
+            <div class="level-item">
+              <h1 class="title has-text-weight-light has-text-bright">
+                Tosbur
+              </h1>
+            </div>
           </div>
-        </div>
 
-        <!-- Right side -->
-        <div class="level-right">
-          <div class="level-item">
-            <b-field>
-              <b-select placeholder="Select an image">
-                <option
-                  v-for="option in allImages"
-                  :value="option.id"
-                  :key="option.id"
-                >
-                  {{ option.name }}
-                </option>
-              </b-select>
-            </b-field>
+          <!-- Right side -->
+          <div class="level-right">
+            <div class="level-item">
+              <b-field>
+                <b-select placeholder="Select an image">
+                  <option
+                    v-for="option in allImages"
+                    :value="option.id"
+                    :key="option.id"
+                  >
+                    {{ option.name }}
+                  </option>
+                </b-select>
+              </b-field>
+            </div>
+            <div class="level-item">
+              <b-button @click="createContainer" type="is-bright"
+                >Launch Container</b-button
+              >
+            </div>
+            <div class="level-item">
+              <b-button @click="getContainers">Get Containers</b-button>
+            </div>
           </div>
-          <div class="level-item">
-            <b-button @click="createContainer" type="is-bright"
-              >Launch Container</b-button
-            >
-          </div>
-        </div>
-      </nav>
-    </div>
-  </section>
+        </nav>
+      </div>
+    </section>
+    <div class="section"><ContainerTable /></div>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import ContainerTable from './components/ContainerTable';
 const { tosbur } = window;
 
 /**
@@ -77,6 +89,9 @@ export default {
       'containersCount',
       'containerStarting'
     ])
+  },
+  components: {
+    ContainerTable
   }
 };
 </script>
@@ -84,10 +99,6 @@ export default {
 <style lang="scss">
 // Import Bulma's core
 @import '~bulma/sass/utilities/_all';
-
-section.top-nav {
-  padding: 0.5em;
-}
 
 // Set your colors
 $primary: #2c003e;

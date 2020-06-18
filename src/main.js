@@ -23,7 +23,12 @@ const store = new Vuex.Store({
   },
   getters: {
     allImages: (state) => state.imageOptions,
-    allContainers: (state) => state.containers,
+    allContainers: (state) =>
+      state.containers.map((c) => ({
+        ...c,
+        name: c.Names[0],
+        id: c.Id.slice(0, 10)
+      })),
     imagesCount: (state, getters) => getters.allImages.length,
     containersCount: (state, getters) => getters.allContainers.length,
     containerStarting: (state) => state.starting
@@ -83,7 +88,21 @@ const store = new Vuex.Store({
           commit('containerStarted', f);
           return f;
         })
+        .then(tosbur.attachToContainer)
+        .then((logs) => {
+          console.log('have logs');
+          console.log(logs);
+          debugger;
+        })
         .then(tosbur.openNewBrowserInstance)
+        .then(tosbur.getContainers)
+        .then((f) => {
+          console.log('got containers');
+          console.log(f);
+          let containers = f;
+          debugger;
+          commit('saveContainers', containers);
+        })
         .catch((e) => {
           console.error(`There was an error creating container ${e}`);
         });

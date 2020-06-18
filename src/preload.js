@@ -53,22 +53,23 @@ async function getContainers() {
 
 // docker run --rm -it -p 8888:8888 -e RESTARTABLE=yes -e JUPYTER_ENABLE_LAB=yes jupyter/minimal-notebook:latest
 
+/**
+ * Settings for create image.
+ * It is unclear what effect some of these parameters (e.g., AttachStdin)
+ * since we are invoking this via REST.
+ * https://docs.docker.com/engine/api/v1.40/#operation/ContainerCreate
+ */
 const imageSettings = {
   AttachStdin: false,
   AttachStdout: true,
   AttachStderr: true,
-  ExposedPorts: {
-    '8888:8888/tcp': {}
-  },
-  Tty: false,
+  Tty: true,
   OpenStdin: false,
   StdinOnce: false,
   Env: ['JUPYTER_ENABLE_LAB=yes'],
-  ArgsEscaped: true,
   Image: 'jupyter/minimal-notebook:latest',
   Labels: {
-    property1: 'string',
-    property2: 'string'
+    'com.optowealth.version': '0.1'
   }
 };
 
@@ -105,6 +106,49 @@ async function startContainer(container) {
   }
 }
 
+/**
+ * This attempts to get the containers logs
+ * @param {String} container
+ * Documentation indicates that on 200 a stream is returned in response body.
+ * https://docs.docker.com/engine/api/v1.40/#operation/ContainerLogs
+ */
+async function getContainerLogs(container) {
+  let { Id } = container;
+  console.log(`attempt to get container logs ${Id}`);
+  try {
+    console.log('attempt to get container logs');
+    const response = await got(
+      `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/logs?stdout=1`
+    );
+    console.log(response);
+    return response.body;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+/**
+ * Attach to container
+ * @param {String} container
+ */
+async function attachToContainer(container) {
+  let { Id } = container;
+  console.log(`attempt to attach container ${Id}`);
+  try {
+    console.log('attempt to attach container');
+    const response = await got.post(
+      `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/attach?logs=true&stream=false`
+    );
+    console.log(`Attach to container returned status: ${response.statusCode}`);
+    console.log(response.message);
+    console.log(Object.keys(response));
+    console.log(response);
+    return response.body;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
 async function openNewBrowserInstance(container) {
   ipcRenderer.send('open-jupyter', JSON.stringify(container));
 }
@@ -115,5 +159,7 @@ contextBridge.exposeInMainWorld('tosbur', {
   openNewBrowserInstance,
   createContainer,
   startContainer,
+  getContainerLogs,
+  attachToContainer,
   title: 'Tosbur'
 });
