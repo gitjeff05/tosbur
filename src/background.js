@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-import { app, protocol, BrowserWindow, ipcMain } from 'electron';
+import { app, protocol, BrowserWindow, BrowserView, ipcMain } from 'electron';
 import {
   createProtocol,
   installVueDevtools
@@ -16,15 +16,13 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
 
-ipcMain.on('open-jupyter', (event, arg) => {
-  console.log(`Received msg: ${arg} in main process`);
-});
-
+const WIDTH = 2400;
+const HEIGHT = 1024;
 function createWindow() {
   // Create the browser window.
   const preloadPath = path.join(__dirname, 'preload.js');
   win = new BrowserWindow({
-    width: 2400,
+    width: WIDTH,
     height: 1024,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -36,13 +34,26 @@ function createWindow() {
     }
   });
 
+  ipcMain.on('open-jupyter', (event, arg) => {
+    console.log(`Received IP: ${arg} in main process`);
+    const view = new BrowserView();
+    win.setBrowserView(view);
+    view.setBounds({ x: 0, y: 100, width: WIDTH, height: HEIGHT - 100 });
+
+    const args = JSON.parse(arg);
+    console.log(args.ip);
+
+    view.webContents.loadURL(args.ip);
+  });
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
     // Alternatively, we can load a local server with jupyter running
     // let url =
     //   'http://127.0.0.1:8888/?token=1234';
-    // win.loadURL(url);
+    // win.loadURL(
+    //   'http://127.0.0.1:8888/?token=5da33d3c9ddfa5efd648bfe5fb2fc349e1dabfac1fd6b35d'
+    // );
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol('app');

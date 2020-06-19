@@ -1,10 +1,33 @@
 <template>
   <div class="container">
-    <b-table
-      :data="allContainers"
-      :narrowed="true"
-      :columns="columns"
-    ></b-table>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>State</th>
+          <th>Status</th>
+          <th>Get Logs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="container in allContainers" v-bind:key="container.Id">
+          <td>{{ container.id }}</td>
+          <td>{{ container.name }}</td>
+          <td>{{ container.State }}</td>
+          <td>{{ container.Status }}</td>
+          <td>
+            <button
+              class="button"
+              v-bind:id="container.Id"
+              @click="attachToContainer"
+            >
+              Attach Container
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -12,28 +35,13 @@
 import { mapGetters } from 'vuex';
 export default {
   data() {
-    return {
-      columns: [
-        {
-          field: 'id',
-          label: 'ID',
-          width: '40',
-          numeric: true
-        },
-        {
-          field: 'name',
-          label: 'Name'
-        },
-        {
-          field: 'State',
-          label: 'State'
-        },
-        {
-          field: 'Status',
-          label: 'Status'
-        }
-      ]
-    };
+    return {};
+  },
+  methods: {
+    attachToContainer: function (a) {
+      const Id = a.currentTarget.getAttribute('id');
+      this.$store.dispatch('attachToContainer', { Id });
+    }
   },
   computed: {
     // mix the getters into computed with object spread operator

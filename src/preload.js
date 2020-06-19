@@ -16,11 +16,32 @@ const generateError = (message, url) =>
     }
   });
 
+const gotErrors = [
+  'TimeoutError',
+  'CancelError',
+  'UnsupportedProtocolError',
+  'CacheError',
+  'RequestError',
+  'ReadError',
+  'ParseError',
+  'HTTPError'
+];
+
+const handleGotError = (error) => {
+  let errorMsg = `${error.name} ${error.message}`;
+  errorMsg = error.response ? `${errorMsg} ${error.response.body}` : errorMsg;
+  throw new Error(errorMsg);
+};
+
 /**
  * Print out a nice error from the response object and rethrow
  * @param {Object} error
  */
 const handleError = (error) => {
+  debugger;
+  if (error.options && gotErrors.includes(error.name)) {
+    return handleGotError(error);
+  }
   let response = error.response
     ? error.response
     : JSON.parse(error.message).response;
@@ -40,10 +61,10 @@ async function getImages() {
 }
 
 async function getContainers() {
+  const endpoint = `${process.env.DOCKER_IPC_SOCKET}/containers/json?all=true`;
+  console.log(endpoint);
   try {
-    const response = await got(
-      `${process.env.DOCKER_IPC_SOCKET}/containers/json?all=true`
-    );
+    const response = await got(endpoint);
     console.log(response.body);
     return JSON.parse(response.body);
   } catch (error) {
@@ -63,11 +84,24 @@ const imageSettings = {
   AttachStdin: false,
   AttachStdout: true,
   AttachStderr: true,
+  ExposedPorts: {
+    '8888/tcp': {}
+  },
+  HostConfig: {
+    PortBindings: {
+      '8888/tcp': [
+        {
+          HostIp: '127.0.0.1',
+          HostPort: '8888'
+        }
+      ]
+    }
+  },
   Tty: true,
   OpenStdin: false,
   StdinOnce: false,
   Env: ['JUPYTER_ENABLE_LAB=yes'],
-  Image: 'jupyter/minimal-notebook:latest',
+  Image: 'jupyter/scipy-notebook:latest',
   Labels: {
     'com.optowealth.version': '0.1'
   }
@@ -127,23 +161,33 @@ async function getContainerLogs(container) {
   }
 }
 
+const getLocalJupyterURL = (str) => {
+  const matches = str.match(
+    /http:\/\/(?:[0-9]{1,3}\.){3}[0-9]{1,3}:8888\/\?token.*/gm
+  );
+  console.log(matches);
+  if (!matches) {
+    console.info(str);
+    throw new Error('Could not extract Jupyter IP address');
+  }
+  return matches[0];
+};
+
 /**
  * Attach to container
  * @param {String} container
  */
 async function attachToContainer(container) {
   let { Id } = container;
-  console.log(`attempt to attach container ${Id}`);
   try {
-    console.log('attempt to attach container');
-    const response = await got.post(
-      `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/attach?logs=true&stream=false`
-    );
-    console.log(`Attach to container returned status: ${response.statusCode}`);
-    console.log(response.message);
-    console.log(Object.keys(response));
-    console.log(response);
-    return response.body;
+    console.log(`attempt to attach container ${Id}`);
+    const endpoint = `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/attach?logs=true&stdout=true`;
+    const response = await got.post(endpoint);
+    if (response.body) {
+      const ip = getLocalJupyterURL(response.body);
+      ipcRenderer.send('open-jupyter', JSON.stringify({ ...container, ip }));
+    }
+    return response;
   } catch (error) {
     handleError(error);
   }

@@ -43,7 +43,7 @@
         </nav>
       </div>
     </section>
-    <div class="section"><ContainerTable /></div>
+    <section class="section"><ContainerTable /></section>
   </div>
 </template>
 

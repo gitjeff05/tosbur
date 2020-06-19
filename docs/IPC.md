@@ -38,6 +38,16 @@ sequenceDiagram
     end
 ```
 
+# Docker Engine API
+
+The [Docker Engine API](https://docs.docker.com/engine/api/sdk/) is a RESTful API accessed by an HTTP client such as wget or curl, or the HTTP library which is part of most modern programming languages.
+
+# Unix Domain Sockets
+
+Docker Engine API requests are sent via unix domain sockets over the http protocol.
+
+A [Unix domain socket](https://github.com/sindresorhus/got#unix-domain-sockets) or IPC socket (inter-process communication socket) is a data communications endpoint for exchanging data between processes executing on the same host operating system.
+
 ## Attaching to a container
 
 According to the docs, we [attach to a container to read its output or send input](https://docs.docker.com/engine/api/v1.40/#operation/ContainerAttach).

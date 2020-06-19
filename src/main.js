@@ -46,6 +46,9 @@ const store = new Vuex.Store({
     },
     containerStarted(state, container) {
       state.started = container.Id;
+    },
+    containerAttached(state, container) {
+      state.attached = container;
     }
   },
   actions: {
@@ -73,6 +76,13 @@ const store = new Vuex.Store({
     sendTestMsg() {
       return tosbur.sendPing();
     },
+    attachToContainer({ commit }, container) {
+      console.log('attachToContainer event dispatched');
+      console.log(container);
+      return tosbur.attachToContainer(container).then((f) => {
+        commit('containerAttached', f);
+      });
+    },
     createContainerAction({ commit }) {
       console.log('createContainerAction');
       return tosbur
@@ -87,21 +97,6 @@ const store = new Vuex.Store({
           console.log(f);
           commit('containerStarted', f);
           return f;
-        })
-        .then(tosbur.attachToContainer)
-        .then((logs) => {
-          console.log('have logs');
-          console.log(logs);
-          debugger;
-        })
-        .then(tosbur.openNewBrowserInstance)
-        .then(tosbur.getContainers)
-        .then((f) => {
-          console.log('got containers');
-          console.log(f);
-          let containers = f;
-          debugger;
-          commit('saveContainers', containers);
         })
         .catch((e) => {
           console.error(`There was an error creating container ${e}`);
