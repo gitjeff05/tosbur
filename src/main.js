@@ -19,7 +19,8 @@ const store = new Vuex.Store({
     imageOptions: [
       { name: 'jupyter/minimal-notebook', id: 0 },
       { name: 'jupyter/scipy-notebook', id: 1 }
-    ]
+    ],
+    version: null
   },
   getters: {
     allImages: (state) => state.imageOptions,
@@ -31,7 +32,8 @@ const store = new Vuex.Store({
       })),
     imagesCount: (state, getters) => getters.allImages.length,
     containersCount: (state, getters) => getters.allContainers.length,
-    containerStarting: (state) => state.starting
+    containerStarting: (state) => state.starting,
+    dockerVersion: (state) => state.version
   },
   mutations: {
     saveImages(state, images) {
@@ -49,6 +51,12 @@ const store = new Vuex.Store({
     },
     containerAttached(state, container) {
       state.attached = container;
+    },
+    containerRemoved(state, container) {
+      state.removed = container;
+    },
+    dockerVersion(state, info) {
+      state.version = info;
     }
   },
   actions: {
@@ -73,14 +81,29 @@ const store = new Vuex.Store({
           console.error(`There was an error fetching containers ${e}`);
         });
     },
-    sendTestMsg() {
-      return tosbur.sendPing();
+    getDockerVersionAction({ commit }) {
+      return tosbur
+        .getDockerVersion()
+        .then((f) => {
+          commit('dockerVersion', f);
+        })
+        .catch((e) => {
+          console.error(`There was an error getting version ${e}`);
+          // should throw here?
+        });
     },
     attachToContainer({ commit }, container) {
       console.log('attachToContainer event dispatched');
       console.log(container);
       return tosbur.attachToContainer(container).then((f) => {
         commit('containerAttached', f);
+      });
+    },
+    removeContainer({ commit }, container) {
+      console.log('removeContainer event dispatched');
+      console.log(container);
+      return tosbur.removeContainer(container).then((f) => {
+        commit('containerRemoved', f);
       });
     },
     createContainerAction({ commit }) {

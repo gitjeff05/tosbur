@@ -24,7 +24,8 @@ const gotErrors = [
   'RequestError',
   'ReadError',
   'ParseError',
-  'HTTPError'
+  'HTTPError',
+  'MaxRedirectsError'
 ];
 
 const handleGotError = (error) => {
@@ -39,6 +40,7 @@ const handleGotError = (error) => {
  */
 const handleError = (error) => {
   debugger;
+  console.error('Handling error in preload.js');
   if (error.options && gotErrors.includes(error.name)) {
     return handleGotError(error);
   }
@@ -64,21 +66,19 @@ async function getContainers() {
   const endpoint = `${process.env.DOCKER_IPC_SOCKET}/containers/json?all=true`;
   console.log(endpoint);
   try {
-    const response = await got(endpoint);
-    console.log(response.body);
-    return JSON.parse(response.body);
+    const body = await got(endpoint).json();
+    return body;
   } catch (error) {
     handleError(error);
   }
 }
-
-// docker run --rm -it -p 8888:8888 -e RESTARTABLE=yes -e JUPYTER_ENABLE_LAB=yes jupyter/minimal-notebook:latest
 
 /**
  * Settings for create image.
  * It is unclear what effect some of these parameters (e.g., AttachStdin)
  * since we are invoking this via REST.
  * https://docs.docker.com/engine/api/v1.40/#operation/ContainerCreate
+ * The ExposedPorts and HostConfig may require changing per container.
  */
 const imageSettings = {
   AttachStdin: false,
@@ -110,13 +110,35 @@ const imageSettings = {
 async function createContainer() {
   try {
     console.log('attempt to create container', imageSettings);
-    const { body } = await got.post(
-      `${process.env.DOCKER_IPC_SOCKET}/containers/create`,
-      {
-        json: imageSettings
-      }
+    const requestUrl = `${process.env.DOCKER_IPC_SOCKET}/containers/create`;
+    const body = await got.post(requestUrl, { json: imageSettings }).json();
+    return body;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function removeContainer({ Id }) {
+  try {
+    console.log('attempt to remove container', Id);
+    await got.delete(
+      `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}?force=1`
     );
-    return JSON.parse(body);
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function getDockerVersion() {
+  try {
+    console.log(`Getting docker version`);
+    const requestUrl = `${process.env.DOCKER_IPC_SOCKET}/version`;
+    const { body, statusCode } = await got(requestUrl, {
+      responseType: 'json'
+    });
+    if (statusCode === 200 && body) {
+      return body;
+    }
   } catch (error) {
     handleError(error);
   }
@@ -150,11 +172,9 @@ async function getContainerLogs(container) {
   let { Id } = container;
   console.log(`attempt to get container logs ${Id}`);
   try {
-    console.log('attempt to get container logs');
     const response = await got(
       `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/logs?stdout=1`
     );
-    console.log(response);
     return response.body;
   } catch (error) {
     handleError(error);
@@ -205,5 +225,7 @@ contextBridge.exposeInMainWorld('tosbur', {
   startContainer,
   getContainerLogs,
   attachToContainer,
+  removeContainer,
+  getDockerVersion,
   title: 'Tosbur'
 });

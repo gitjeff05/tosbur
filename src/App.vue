@@ -20,7 +20,7 @@
           <div class="level-right">
             <div class="level-item">
               <b-field>
-                <b-select placeholder="Select an image">
+                <b-select placeholder="Select an image" size="is-small">
                   <option
                     v-for="option in allImages"
                     :value="option.id"
@@ -32,12 +32,20 @@
               </b-field>
             </div>
             <div class="level-item">
-              <b-button @click="createContainer" type="is-bright"
+              <b-button
+                @click="createContainer"
+                class="is-small"
+                type="is-bright"
                 >Launch Container</b-button
               >
             </div>
             <div class="level-item">
-              <b-button @click="getContainers">Get Containers</b-button>
+              <b-button class="is-small" @click="getContainers"
+                >Get Containers</b-button
+              >
+            </div>
+            <div v-if="dockerVersion" class="level-item">
+              <docker-info></docker-info>
             </div>
           </div>
         </nav>
@@ -50,6 +58,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import ContainerTable from './components/ContainerTable';
+import DockerInfo from './components/DockerInfo';
 const { tosbur } = window;
 
 /**
@@ -62,6 +71,10 @@ export default {
     hasContainers: false,
     hasImages: false
   }),
+  created: function () {
+    this.$store.dispatch('getDockerVersionAction');
+    this.$store.dispatch('getContainersAction');
+  },
   /**
    * The difference between methods and computeds:
    * computed properties are cached based on their reactive dependencies
@@ -72,9 +85,6 @@ export default {
     },
     getContainers: function () {
       this.$store.dispatch('getContainersAction');
-    },
-    ping: function () {
-      this.$store.dispatch('sendTestMsg');
     },
     createContainer: function () {
       this.$store.dispatch('createContainerAction');
@@ -91,7 +101,8 @@ export default {
     ])
   },
   components: {
-    ContainerTable
+    ContainerTable,
+    DockerInfo
   }
 };
 </script>

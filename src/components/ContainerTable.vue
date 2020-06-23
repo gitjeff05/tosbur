@@ -7,7 +7,8 @@
           <th>Name</th>
           <th>State</th>
           <th>Status</th>
-          <th>Get Logs</th>
+          <th>Attach</th>
+          <th>Remove</th>
         </tr>
       </thead>
       <tbody>
@@ -23,6 +24,15 @@
               @click="attachToContainer"
             >
               Attach Container
+            </button>
+          </td>
+          <td>
+            <button
+              class="button"
+              v-bind:id="container.Id"
+              @click="removeContainer"
+            >
+              Remove Container
             </button>
           </td>
         </tr>
@@ -41,6 +51,10 @@ export default {
     attachToContainer: function (a) {
       const Id = a.currentTarget.getAttribute('id');
       this.$store.dispatch('attachToContainer', { Id });
+    },
+    removeContainer: function (a) {
+      const Id = a.currentTarget.getAttribute('id');
+      this.$store.dispatch('removeContainer', { Id });
     }
   },
   computed: {
