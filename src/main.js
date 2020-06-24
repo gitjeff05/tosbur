@@ -11,6 +11,13 @@ Vue.config.productionTip = false;
 
 const { tosbur } = window;
 
+const logger = (msg, obj) => {
+  if (process.env.NODE_ENV == 'development') {
+    console.log(msg);
+    console.log(obj);
+  }
+};
+
 const store = new Vuex.Store({
   state: {
     images: [],
@@ -64,7 +71,7 @@ const store = new Vuex.Store({
       return tosbur
         .getImages()
         .then((f) => {
-          console.log(f);
+          logger('fetched images', f);
           commit('saveImages', f);
         })
         .catch((e) => {
@@ -75,6 +82,7 @@ const store = new Vuex.Store({
       return tosbur
         .getContainers()
         .then((f) => {
+          logger('fetched containers', f);
           commit('saveContainers', f);
         })
         .catch((e) => {
@@ -85,39 +93,36 @@ const store = new Vuex.Store({
       return tosbur
         .getDockerVersion()
         .then((f) => {
+          logger('fetched docker version', f);
           commit('dockerVersion', f);
         })
         .catch((e) => {
           console.error(`There was an error getting version ${e}`);
-          // should throw here?
         });
     },
     attachToContainer({ commit }, container) {
-      console.log('attachToContainer event dispatched');
-      console.log(container);
       return tosbur.attachToContainer(container).then((f) => {
+        logger('attached to container', container);
         commit('containerAttached', f);
       });
     },
     removeContainer({ commit }, container) {
-      console.log('removeContainer event dispatched');
-      console.log(container);
       return tosbur.removeContainer(container).then((f) => {
+        logger('container removed', container);
         commit('containerRemoved', f);
       });
     },
     createContainerAction({ commit }) {
-      console.log('createContainerAction');
       return tosbur
         .createContainer()
         .then((f) => {
+          logger('container created', f);
           commit('containerCreated', f);
           return f;
         })
         .then(tosbur.startContainer)
         .then((f) => {
-          console.log('container started');
-          console.log(f);
+          logger('container started', f);
           commit('containerStarted', f);
           return f;
         })

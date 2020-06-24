@@ -97,7 +97,8 @@ export default {
       'imagesCount',
       'allContainers',
       'containersCount',
-      'containerStarting'
+      'containerStarting',
+      'dockerVersion'
     ])
   },
   components: {
