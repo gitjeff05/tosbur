@@ -18,14 +18,34 @@ const logger = (msg, obj) => {
   }
 };
 
-async function delay(x) {
-  await new Promise((resolve) => setTimeout(resolve, x));
-}
+/**
+ * Iterate through the containers and execute a command
+ * (jupyter --version)
+ * This helps us differentiate between containers running
+ * jupyter and those that are not.
+ */
+const getContainersWithInfo = async () => {
+  const containers = await tosbur.getContainers();
+  return Promise.all(
+    containers.map(async (c) => {
+      if (c.State !== 'running') {
+        return c;
+      }
+      const contents = await tosbur.getJupyterInfo(c);
+      return {
+        ...c,
+        hasJupyter: contents.indexOf('jupyter-notebook') > 0 ? true : false
+      };
+    })
+  ).catch((e) => {
+    console.error(`There was an error fetching containers ${e}`);
+  });
+};
 
 const store = new Vuex.Store({
+  strict: process.env.NODE_ENV == 'development',
   state: {
     images: [],
-    starting: false,
     containers: [],
     imageOptions: [
       { name: 'jupyter/minimal-notebook', id: 0 },
@@ -41,9 +61,6 @@ const store = new Vuex.Store({
         name: c.Names[0],
         id: c.Id.slice(0, 10)
       })),
-    imagesCount: (state, getters) => getters.allImages.length,
-    containersCount: (state, getters) => getters.allContainers.length,
-    containerStarting: (state) => state.starting,
     dockerVersion: (state) => state.version,
     notebookLoaded: (state) => state.attached
   },
@@ -53,10 +70,6 @@ const store = new Vuex.Store({
     },
     saveContainers(state, containers) {
       state.containers = containers;
-    },
-    containerCreated(state, container) {
-      state.starting = true;
-      state.startingContainer = container;
     },
     containerStarted(state, container) {
       state.started = container.Id;
@@ -83,16 +96,9 @@ const store = new Vuex.Store({
           console.error(`There was an error fetching images ${e}`);
         });
     },
-    getContainersAction({ commit }) {
-      return tosbur
-        .getContainers()
-        .then((f) => {
-          logger('fetched containers', f);
-          commit('saveContainers', f);
-        })
-        .catch((e) => {
-          console.error(`There was an error fetching containers ${e}`);
-        });
+    async getContainersAction(context) {
+      const { commit } = context;
+      commit('saveContainers', await getContainersWithInfo());
     },
     getDockerVersionAction({ commit }) {
       return tosbur
@@ -111,43 +117,25 @@ const store = new Vuex.Store({
         commit('containerAttached', f);
       });
     },
-    removeContainer({ commit }, container) {
-      return tosbur
-        .removeContainer(container)
-        .then((f) => {
-          logger('container removed', container);
-          commit('containerRemoved', f);
-        })
-        .then(delay.bind(null, 2000))
-        .then(tosbur.getContainers)
-        .then((f) => {
-          logger('fetched containers', f);
-          commit('saveContainers', f);
-        });
+    async removeContainer({ commit }, container) {
+      try {
+        commit('containerRemoved', await tosbur.removeContainer(container));
+        commit('saveContainers', await getContainersWithInfo());
+      } catch (error) {
+        console.error('Remove Container failed');
+        console.error(error);
+      }
     },
-    createContainerAction({ commit }) {
-      return tosbur
-        .createContainer()
-        .then((f) => {
-          logger('container created', f);
-          commit('containerCreated', f);
-          return f;
-        })
-        .then(tosbur.startContainer)
-        .then((f) => {
-          logger('container started', f);
-          commit('containerStarted', f);
-          return f;
-        })
-        .then(delay.bind(null, 1000))
-        .then(tosbur.getContainers)
-        .then((f) => {
-          logger('fetched containers', f);
-          commit('saveContainers', f);
-        })
-        .catch((e) => {
-          console.error(`There was an error creating container ${e}`);
-        });
+    async createContainerAction({ commit }) {
+      try {
+        const createContainer = await tosbur.createContainer();
+        const container = await tosbur.startContainer(createContainer);
+        commit('containerStarted', container);
+        commit('saveContainers', await getContainersWithInfo());
+      } catch (error) {
+        console.error('Create Container failed');
+        console.error(error);
+      }
     }
   }
 });

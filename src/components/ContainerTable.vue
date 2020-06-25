@@ -8,6 +8,7 @@
           <th>State</th>
           <th>Status</th>
           <th>Attach</th>
+          <th>Jupyter</th>
           <th>Remove</th>
         </tr>
       </thead>
@@ -19,16 +20,18 @@
           <td>{{ container.Status }}</td>
           <td>
             <button
-              class="button"
+              v-if="container.hasJupyter"
+              class="button is-small is-primary"
               v-bind:id="container.Id"
               @click="attachToContainer"
             >
               Attach Container
             </button>
           </td>
+          <td><span v-if="container.hasJupyter">Jupyter enabled</span></td>
           <td>
             <button
-              class="button"
+              class="button is-small"
               v-bind:id="container.Id"
               @click="removeContainer"
             >

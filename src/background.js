@@ -17,7 +17,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 const WIDTH = 2400;
-const HEIGHT = 700;
+const HEIGHT = 1000;
 async function createWindow() {
   // Create the browser window.
   const preloadPath = path.join(__dirname, 'preload.js');

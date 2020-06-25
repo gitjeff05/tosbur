@@ -96,10 +96,7 @@ export default {
     // mix the getters into computed with object spread operator
     ...mapGetters([
       'allImages',
-      'imagesCount',
       'allContainers',
-      'containersCount',
-      'containerStarting',
       'notebookLoaded',
       'dockerVersion'
     ])
