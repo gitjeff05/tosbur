@@ -18,6 +18,10 @@ const logger = (msg, obj) => {
   }
 };
 
+async function delay(x) {
+  await new Promise((resolve) => setTimeout(resolve, x));
+}
+
 const store = new Vuex.Store({
   state: {
     images: [],
@@ -40,7 +44,8 @@ const store = new Vuex.Store({
     imagesCount: (state, getters) => getters.allImages.length,
     containersCount: (state, getters) => getters.allContainers.length,
     containerStarting: (state) => state.starting,
-    dockerVersion: (state) => state.version
+    dockerVersion: (state) => state.version,
+    notebookLoaded: (state) => state.attached
   },
   mutations: {
     saveImages(state, images) {
@@ -107,10 +112,18 @@ const store = new Vuex.Store({
       });
     },
     removeContainer({ commit }, container) {
-      return tosbur.removeContainer(container).then((f) => {
-        logger('container removed', container);
-        commit('containerRemoved', f);
-      });
+      return tosbur
+        .removeContainer(container)
+        .then((f) => {
+          logger('container removed', container);
+          commit('containerRemoved', f);
+        })
+        .then(delay.bind(null, 2000))
+        .then(tosbur.getContainers)
+        .then((f) => {
+          logger('fetched containers', f);
+          commit('saveContainers', f);
+        });
     },
     createContainerAction({ commit }) {
       return tosbur
@@ -125,6 +138,12 @@ const store = new Vuex.Store({
           logger('container started', f);
           commit('containerStarted', f);
           return f;
+        })
+        .then(delay.bind(null, 1000))
+        .then(tosbur.getContainers)
+        .then((f) => {
+          logger('fetched containers', f);
+          commit('saveContainers', f);
         })
         .catch((e) => {
           console.error(`There was an error creating container ${e}`);

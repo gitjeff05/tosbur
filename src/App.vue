@@ -51,7 +51,9 @@
         </nav>
       </div>
     </section>
-    <section class="section"><ContainerTable /></section>
+    <section v-if="!notebookLoaded" class="section">
+      <ContainerTable />
+    </section>
   </div>
 </template>
 
@@ -98,6 +100,7 @@ export default {
       'allContainers',
       'containersCount',
       'containerStarting',
+      'notebookLoaded',
       'dockerVersion'
     ])
   },

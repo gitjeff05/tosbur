@@ -64,7 +64,7 @@ async function getImages() {
 
 async function getContainers() {
   const endpoint = `${process.env.DOCKER_IPC_SOCKET}/containers/json?all=true`;
-  console.log(endpoint);
+  console.log(`Attempt to fetch containers from ${endpoint}`);
   try {
     const body = await got(endpoint).json();
     return body;
@@ -202,6 +202,7 @@ async function attachToContainer(container) {
   try {
     console.log(`attempt to attach container ${Id}`);
     const endpoint = `${process.env.DOCKER_IPC_SOCKET}/containers/${Id}/attach?logs=true&stdout=true`;
+    // Do not parse the body as json because this is console output.
     const response = await got.post(endpoint);
     if (response.body) {
       const ip = getLocalJupyterURL(response.body);
@@ -213,14 +214,9 @@ async function attachToContainer(container) {
   }
 }
 
-async function openNewBrowserInstance(container) {
-  ipcRenderer.send('open-jupyter', JSON.stringify(container));
-}
-
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
   getContainers,
-  openNewBrowserInstance,
   createContainer,
   startContainer,
   getContainerLogs,

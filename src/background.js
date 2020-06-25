@@ -18,7 +18,7 @@ protocol.registerSchemesAsPrivileged([
 
 const WIDTH = 2400;
 const HEIGHT = 700;
-function createWindow() {
+async function createWindow() {
   // Create the browser window.
   const preloadPath = path.join(__dirname, 'preload.js');
   win = new BrowserWindow({
@@ -34,9 +34,14 @@ function createWindow() {
     }
   });
 
+  let view = new BrowserView();
+
+  /**
+   * When use selects "attach" we create a set the main window's
+   * BrowserView to `view` and set the bounds.
+   */
   ipcMain.on('open-jupyter', (event, arg) => {
     console.log(`Received IP: ${arg} in main process`);
-    const view = new BrowserView();
     win.setBrowserView(view);
     view.setBounds({ x: 0, y: 100, width: WIDTH, height: HEIGHT - 300 });
     const args = JSON.parse(arg);
@@ -46,7 +51,7 @@ function createWindow() {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol('app');
