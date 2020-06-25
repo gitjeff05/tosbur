@@ -96,6 +96,9 @@ const store = new Vuex.Store({
           console.error(`There was an error fetching images ${e}`);
         });
     },
+    async closeContainerAction({ commit }) {
+      commit('containerAttached', await tosbur.closeWebView());
+    },
     async getContainersAction(context) {
       const { commit } = context;
       commit('saveContainers', await getContainersWithInfo());

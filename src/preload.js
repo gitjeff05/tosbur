@@ -249,6 +249,12 @@ async function attachToContainer(container) {
   }
 }
 
+async function closeWebView() {
+  await ipcRenderer.invoke('close-web-view').then((f) => {
+    return 'done closing';
+  });
+}
+
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
   getContainers,
@@ -259,5 +265,6 @@ contextBridge.exposeInMainWorld('tosbur', {
   removeContainer,
   getDockerVersion,
   getJupyterInfo,
+  closeWebView,
   title: 'Tosbur'
 });

@@ -49,6 +49,16 @@ async function createWindow() {
     view.webContents.loadURL(args.ip);
   });
 
+  /**
+   * handle close notebook. remove browserView instance
+   * attached to window.
+   */
+  ipcMain.handle('close-web-view', async () => {
+    const bv = win.getBrowserView();
+    win.removeBrowserView(bv);
+    return true;
+  });
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
