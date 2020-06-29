@@ -51,7 +51,8 @@ const store = new Vuex.Store({
       { name: 'jupyter/minimal-notebook', id: 0 },
       { name: 'jupyter/scipy-notebook', id: 1 }
     ],
-    version: null
+    version: null,
+    dockerRunning: true
   },
   getters: {
     allImages: (state) => state.imageOptions,
@@ -62,7 +63,8 @@ const store = new Vuex.Store({
         id: c.Id.slice(0, 10)
       })),
     dockerVersion: (state) => state.version,
-    notebookLoaded: (state) => state.attached
+    notebookLoaded: (state) => state.attached,
+    dockerRunning: (state) => state.dockerRunning
   },
   mutations: {
     saveImages(state, images) {
@@ -82,6 +84,10 @@ const store = new Vuex.Store({
     },
     dockerVersion(state, info) {
       state.version = info;
+      state.dockerRunning = true;
+    },
+    dockerNotRunning(state) {
+      state.dockerRunning = false;
     }
   },
   actions: {
@@ -111,6 +117,13 @@ const store = new Vuex.Store({
           commit('dockerVersion', f);
         })
         .catch((e) => {
+          if (
+            e.message.indexOf('connection refused') > -1 ||
+            e.message.indexOf('ECONNREFUSED') > -1
+          ) {
+            console.warn('docker not running');
+            commit('dockerNotRunning');
+          }
           console.error(`There was an error getting version ${e}`);
         });
     },

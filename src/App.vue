@@ -59,7 +59,9 @@
         </nav>
       </div>
     </section>
-    <section v-if="!notebookLoaded" class="section">
+    <section v-if="!dockerRunning"><DockerStatusToast /></section>
+
+    <section v-else-if="!notebookLoaded" class="section">
       <ContainerTable />
     </section>
   </div>
@@ -69,6 +71,7 @@
 import { mapGetters } from 'vuex';
 import ContainerTable from './components/ContainerTable';
 import DockerInfo from './components/DockerInfo';
+import DockerStatusToast from './components/DockerStatusToast';
 const { tosbur } = window;
 
 /**
@@ -109,12 +112,14 @@ export default {
       'allImages',
       'allContainers',
       'notebookLoaded',
-      'dockerVersion'
+      'dockerVersion',
+      'dockerRunning'
     ])
   },
   components: {
     ContainerTable,
-    DockerInfo
+    DockerInfo,
+    DockerStatusToast
   }
 };
 </script>

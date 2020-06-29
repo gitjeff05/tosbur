@@ -33,6 +33,7 @@ async function createWindow() {
       preload: preloadPath
     }
   });
+  win.maximize();
 
   let view = new BrowserView();
 
@@ -43,7 +44,9 @@ async function createWindow() {
   ipcMain.on('open-jupyter', (event, arg) => {
     console.log(`Received IP: ${arg} in main process`);
     win.setBrowserView(view);
-    view.setBounds({ x: 0, y: 100, width: WIDTH, height: HEIGHT - 300 });
+    let [width, height] = win.getSize();
+    console.log(width, height);
+    view.setBounds({ x: 1, y: 50, width: width - 20, height: height - 600 });
     const args = JSON.parse(arg);
     console.log(args.ip);
     view.webContents.loadURL(args.ip);
