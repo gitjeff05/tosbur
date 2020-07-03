@@ -9,7 +9,7 @@
       >
         <span>Docker Info</span>
         <span class="icon is-small">
-          <i class="fas fa-angle-down" aria-hidden="true"></i>
+          <font-awesome-icon icon="info-circle" />
         </span>
       </button>
     </div>
@@ -52,7 +52,7 @@ import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
-      dropdownClass: 'dropdown',
+      dropdownClass: 'dropdown is-right',
       showDockerInfo: false
     };
   },

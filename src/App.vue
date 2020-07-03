@@ -4,13 +4,13 @@
       id="app"
       class="section top-nav is-paddingless py-1 has-background-dark"
     >
-      <div class="container">
+      <div class="container is-fluid tosbur-nav">
         <!-- Main container -->
         <nav class="level">
           <!-- Left side -->
           <div class="level-left">
             <div class="level-item">
-              <h1 class="title has-text-weight-light has-text-bright">
+              <h1 class="title is-size-5 has-text-weight-light has-text-light">
                 Tosbur
               </h1>
             </div>
@@ -18,7 +18,7 @@
 
           <!-- Right side -->
           <div class="level-right">
-            <div class="level-item">
+            <div v-if="notebookLoaded" class="level-item">
               <b-button
                 @click="closeContainer"
                 class="is-small"
@@ -27,29 +27,11 @@
               >
             </div>
             <div class="level-item">
-              <b-field>
-                <b-select placeholder="Select an image" size="is-small">
-                  <option
-                    v-for="option in allImages"
-                    :value="option.id"
-                    :key="option.id"
-                  >
-                    {{ option.name }}
-                  </option>
-                </b-select>
-              </b-field>
-            </div>
-            <div class="level-item">
               <b-button
                 @click="createContainer"
                 class="is-small"
                 type="is-bright"
                 >Launch Container</b-button
-              >
-            </div>
-            <div class="level-item">
-              <b-button class="is-small" @click="getContainers"
-                >Get Containers</b-button
               >
             </div>
             <div v-if="dockerVersion" class="level-item">
@@ -61,6 +43,12 @@
     </section>
     <section v-if="!dockerRunning"><DockerStatusToast /></section>
 
+    <section
+      v-else-if="!notebookLoaded && allContainers.length == 0"
+      class="section"
+    >
+      <StartupFlow />
+    </section>
     <section v-else-if="!notebookLoaded" class="section">
       <ContainerTable />
     </section>
@@ -69,9 +57,12 @@
 
 <script>
 import { mapGetters } from 'vuex';
+
 import ContainerTable from './components/ContainerTable';
 import DockerInfo from './components/DockerInfo';
 import DockerStatusToast from './components/DockerStatusToast';
+import StartupFlow from './components/StartupFlow';
+
 const { tosbur } = window;
 
 /**
@@ -119,7 +110,8 @@ export default {
   components: {
     ContainerTable,
     DockerInfo,
-    DockerStatusToast
+    DockerStatusToast,
+    StartupFlow
   }
 };
 </script>
@@ -128,69 +120,50 @@ export default {
 // Import Bulma's core
 @import '~bulma/sass/utilities/_all';
 
-// Set your colors
-$primary: #2c003e;
+#app .tosbur-nav.is-fluid {
+  padding: 0 1em;
+}
+
+/* SCSS HEX 
+https://coolors.co/4d8b31-f2bb05-1e2d2f-fbf5f3-bb342f
+*/
+$maximum-green: #4d8b31ff;
+$orange-yellow: #f2bb05ff;
+$primary: #1e2d2fff;
 $primary-invert: findColorInvert($primary);
-$twitter: #4099ff;
-$twitter-invert: findColorInvert($twitter);
-$dark: #512b58;
-$dark-invert: findColorInvert($dark);
-$bright: #fe346e;
-$bright-invert: findColorInvert($bright);
+$primary-dark: #18231dff;
+$primary-tags: #30484bff;
+$sap-green: #43792aff;
+$snow: #fbf5f3ff;
+$international-orange-golden-gate-bridge: #bb342fff;
 
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
+/* eslint-disable prettier/prettier */
 $colors: (
-  'bright': (
-    $bright,
-    $primary
-  ),
-  'white': (
-    $white,
-    $black
-  ),
-  'black': (
-    $black,
-    $white
-  ),
-  'light': (
-    $light,
-    $light-invert
-  ),
-  'dark': (
-    $dark,
-    $dark-invert
-  ),
-  'primary': (
-    $primary,
-    $primary-invert
-  ),
-  'info': (
-    $info,
-    $info-invert
-  ),
-  'success': (
-    $success,
-    $success-invert
-  ),
-  'warning': (
-    $warning,
-    $warning-invert
-  ),
-  'danger': (
-    $danger,
-    $danger-invert
-  ),
-  'twitter': (
-    $twitter,
-    $twitter-invert
-  )
+    "white": ($white, $black),
+    "black": ($black, $white),
+    "light": ($snow, $primary),
+    "dark": ($primary-dark, $snow),
+    "primary": ($primary, $primary-invert),
+    "primary-tags": ($primary-tags, $primary-invert),
+    "info": ($info, $info-invert),
+    "green": ($maximum-green, $snow),
+    "green-selected": ($sap-green, $snow),
+    "success": ($success, $success-invert),
+    "warning": ($orange-yellow, $warning-invert),
+    "danger": ($international-orange-golden-gate-bridge, $danger-invert)
 );
+/* eslint-enable */
 
 // Links
 $link: $primary;
 $link-invert: $primary-invert;
 $link-focus-border: $primary;
 $button-hover-bright: $white;
+
+body {
+  background-color: $snow;
+}
 
 // Import Bulma and Buefy styles
 @import '~bulma';

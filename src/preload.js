@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
 const got = require('got');
 
 /**
@@ -123,6 +124,7 @@ const imageSettings = {
     '8888/tcp': {}
   },
   HostConfig: {
+    Binds: ['/Users/bishop/Github/nih-grant-awards:/home/jovyan/nih'],
     PortBindings: {
       '8888/tcp': [
         {
@@ -255,6 +257,8 @@ async function closeWebView() {
   });
 }
 
+const validatePath = (path) => fs.promises.readdir(path);
+
 contextBridge.exposeInMainWorld('tosbur', {
   getImages,
   getContainers,
@@ -266,5 +270,6 @@ contextBridge.exposeInMainWorld('tosbur', {
   getDockerVersion,
   getJupyterInfo,
   closeWebView,
+  validatePath,
   title: 'Tosbur'
 });

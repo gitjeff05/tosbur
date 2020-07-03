@@ -3,7 +3,7 @@
 ```mermaid
 sequenceDiagram
     participant D as Docker
-    participant M as Main (background.js)
+    participant M as Main Process (background.js)
     participant R as Renderer
     participant A as <App />
     participant C as <components />

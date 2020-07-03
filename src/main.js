@@ -4,8 +4,49 @@ import Vuex from 'vuex';
 import App from './App.vue';
 import Buefy from 'buefy';
 
+/**
+ * Begin FontAwesome import and configuration.
+ */
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import {
+  faUserSecret,
+  faAngleDown,
+  faInfoCircle,
+  faBoxOpen,
+  faChevronLeft,
+  faChevronRight,
+  faHdd,
+  faRocket
+} from '@fortawesome/free-solid-svg-icons';
+import { faPython } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+library.add(
+  faPython,
+  faUserSecret,
+  faAngleDown,
+  faInfoCircle,
+  faBoxOpen,
+  faChevronLeft,
+  faChevronRight,
+  faHdd,
+  faRocket
+);
+// https://github.com/FortAwesome/vue-fontawesome#processing-i-tags-into-svg-using-font-awesome
+// Note that the FontAwesome SVG core does not watch the page for changes
+// https://fontawesome.com/how-to-use/javascript-api/setup/getting-started#comparison
+dom.watch(); // This will kick of the initial replacement of i to svg tags and configure a MutationObserver
+Vue.use(Buefy, { defaultIconPack: 'fas' });
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+/* end FontAwesome/Buefy config */
+
+/**
+ * Use Vuex
+ */
 Vue.use(Vuex);
-Vue.use(Buefy);
+
+import scipyNotebookDependencies from './data/images/scipy-notebook-conda-list-no-pip.json';
+import minimalNotebookDependencies from './data/images/minimal-notebook-conda-list-no-pip.json';
 
 Vue.config.productionTip = false;
 
@@ -48,9 +89,27 @@ const store = new Vuex.Store({
     images: [],
     containers: [],
     imageOptions: [
-      { name: 'jupyter/minimal-notebook', id: 0 },
-      { name: 'jupyter/scipy-notebook', id: 1 }
+      {
+        name: 'Basic Notebook',
+        imageName: 'jupyter/minimal-notebook',
+        description:
+          'A basic notebook to get you started. Comes with Jupyter, Python and Node.js',
+        id: 0,
+        installedPackages: minimalNotebookDependencies
+      },
+      {
+        name: 'Machine Learning Notebook',
+        imageName: 'jupyter/scipy-notebook',
+        description:
+          'A full featured notebook environment. Everything you need to analyze data, create visualizations and build machine learning models.',
+        id: 1,
+        installedPackages: scipyNotebookDependencies
+      }
     ],
+    startup: {
+      image: null,
+      mount: null
+    },
     version: null,
     dockerRunning: true
   },
@@ -88,6 +147,12 @@ const store = new Vuex.Store({
     },
     dockerNotRunning(state) {
       state.dockerRunning = false;
+    },
+    imageSelected(state, imageName) {
+      state.startup.image = imageName;
+    },
+    mountSelected(state, mount) {
+      state.startup.mount = mount;
     }
   },
   actions: {
@@ -104,6 +169,18 @@ const store = new Vuex.Store({
     },
     async closeContainerAction({ commit }) {
       commit('containerAttached', await tosbur.closeWebView());
+    },
+    selectImageAction({ commit }, imageName) {
+      commit('imageSelected', imageName);
+    },
+    async selectMountPath({ commit }, path) {
+      try {
+        logger(`Files in ${path}`, await tosbur.validatePath(path));
+        commit('mountSelected', path);
+        return path;
+      } catch (error) {
+        throw new Error(`Not a valid path ${path}`);
+      }
     },
     async getContainersAction(context) {
       const { commit } = context;

@@ -6,6 +6,12 @@
 	],
 	"settings": {
 		"eslint.alwaysShowStatus": true,
-		"editor.tabCompletion": "onlySnippets"
+		"editor.tabCompletion": "onlySnippets",
+		"cSpell.words": [
+			"fortawesome"
+		],
+		"editor.cursorBlinking": "smooth",
+		"workbench.colorTheme": "Noctis Uva",
+		"cSpell.allowCompoundWords": true
 	}
 }
