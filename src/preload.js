@@ -17,6 +17,7 @@ const generateError = (message, url) =>
     }
   });
 
+// List of possible GOT errors
 const gotErrors = [
   'TimeoutError',
   'CancelError',
@@ -54,6 +55,9 @@ const handleError = (error) => {
   throw new Error(errorMsg);
 };
 
+/**
+ * Get docker images.
+ */
 async function getImages() {
   try {
     const response = await got(`${process.env.DOCKER_IPC_SOCKET}/images/json`);
@@ -144,17 +148,39 @@ const imageSettings = {
   }
 };
 
-async function createContainer() {
+/**
+ * Override default settings for creating image
+ * @param {Object} startup settings (image, mount)
+ * @param {Object} imageSettings - default settings
+ */
+const createImageSettings = (startup, imageSettings) => {
+  const { mount, image } = startup;
+  const { HostConfig } = imageSettings;
+  const bindMount = `${mount}:/home/jovyan/`;
+  const hostConfig = { ...HostConfig, Binds: [bindMount] };
+  return { ...imageSettings, HostConfig: hostConfig, Image: image };
+};
+
+/**
+ * Create a container
+ * @param {Object} startup object ({ image, mount })
+ */
+async function createContainer(startup) {
   try {
-    console.log('attempt to create container', imageSettings);
+    const json = createImageSettings(startup, imageSettings);
+    console.log('attempt to create container', json);
     const requestUrl = `${process.env.DOCKER_IPC_SOCKET}/containers/create`;
-    const body = await got.post(requestUrl, { json: imageSettings }).json();
+    const body = await got.post(requestUrl, { json }).json();
     return body;
   } catch (error) {
     handleError(error);
   }
 }
 
+/**
+ * Remove a container
+ * @param {String} Id is the id of the container to delete.
+ */
 async function removeContainer({ Id }) {
   try {
     console.log('attempt to remove container', Id);
@@ -166,6 +192,9 @@ async function removeContainer({ Id }) {
   }
 }
 
+/**
+ * Get the version of docker.
+ */
 async function getDockerVersion() {
   try {
     console.log(`Getting docker version`);
@@ -181,6 +210,10 @@ async function getDockerVersion() {
   }
 }
 
+/**
+ * Start a container
+ * @param {Object} container to start
+ */
 async function startContainer(container) {
   const { Id } = container;
   try {
@@ -232,6 +265,7 @@ const getLocalJupyterURL = (str) => {
 
 /**
  * Attach to container
+ * Sends the 'open-jupyter' message to the main process with the payload containing the ip address of the jupyter notebook.
  * @param {String} container
  */
 async function attachToContainer(container) {

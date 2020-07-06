@@ -136,6 +136,7 @@ const store = new Vuex.Store({
       state.started = container.Id;
     },
     containerAttached(state, container) {
+      console.log('attaching container');
       state.attached = container;
     },
     containerRemoved(state, container) {
@@ -219,9 +220,9 @@ const store = new Vuex.Store({
         console.error(error);
       }
     },
-    async createContainerAction({ commit }) {
+    async createContainerAction({ commit, state }) {
       try {
-        const createContainer = await tosbur.createContainer();
+        const createContainer = await tosbur.createContainer(state.startup);
         const container = await tosbur.startContainer(createContainer);
         commit('containerStarted', container);
         commit('saveContainers', await getContainersWithInfo());

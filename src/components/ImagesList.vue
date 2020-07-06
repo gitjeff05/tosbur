@@ -7,7 +7,7 @@
       v-bind:class="[
         selected === image.imageName
           ? 'has-background-green'
-          : 'has-background-primary',
+          : 'has-background-black',
         imageClasses
       ]"
     >
@@ -134,5 +134,11 @@ export default {
 .image {
   min-height: 250px;
   width: 50%;
+}
+.image > article {
+  padding-right: 4em;
+}
+.image > article > .media-content h1 {
+  margin-bottom: 0.1em;
 }
 </style>

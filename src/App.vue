@@ -26,14 +26,6 @@
                 >Close Container</b-button
               >
             </div>
-            <div class="level-item">
-              <b-button
-                @click="createContainer"
-                class="is-small"
-                type="is-bright"
-                >Launch Container</b-button
-              >
-            </div>
             <div v-if="dockerVersion" class="level-item">
               <docker-info></docker-info>
             </div>
@@ -77,7 +69,12 @@ export default {
   }),
   created: function () {
     this.$store.dispatch('getDockerVersionAction');
-    this.$store.dispatch('getContainersAction');
+    this.$store.dispatch('getContainersAction').then((containers) => {
+      if (!containers) {
+        console.log('dispatching closeContainerAction -- no containers found');
+        this.$store.dispatch('closeContainerAction');
+      }
+    });
   },
   /**
    * The difference between methods and computeds:
@@ -140,18 +137,54 @@ $international-orange-golden-gate-bridge: #bb342fff;
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
 /* eslint-disable prettier/prettier */
 $colors: (
-    "white": ($white, $black),
-    "black": ($black, $white),
-    "light": ($snow, $primary),
-    "dark": ($primary-dark, $snow),
-    "primary": ($primary, $primary-invert),
-    "primary-tags": ($primary-tags, $primary-invert),
-    "info": ($info, $info-invert),
-    "green": ($maximum-green, $snow),
-    "green-selected": ($sap-green, $snow),
-    "success": ($success, $success-invert),
-    "warning": ($orange-yellow, $warning-invert),
-    "danger": ($international-orange-golden-gate-bridge, $danger-invert)
+  'white': (
+    $white,
+    $black
+  ),
+  'black': (
+    $black,
+    $white
+  ),
+  'light': (
+    $snow,
+    $primary
+  ),
+  'dark': (
+    $primary-dark,
+    $snow
+  ),
+  'primary': (
+    $primary,
+    $primary-invert
+  ),
+  'primary-tags': (
+    $primary-tags,
+    $primary-invert
+  ),
+  'info': (
+    $info,
+    $info-invert
+  ),
+  'green': (
+    $maximum-green,
+    $snow
+  ),
+  'green-selected': (
+    $sap-green,
+    $snow
+  ),
+  'success': (
+    $success,
+    $success-invert
+  ),
+  'warning': (
+    $orange-yellow,
+    $warning-invert
+  ),
+  'danger': (
+    $international-orange-golden-gate-bridge,
+    $danger-invert
+  )
 );
 /* eslint-enable */
 

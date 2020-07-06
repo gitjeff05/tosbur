@@ -12,7 +12,7 @@
         <ImagesList />
       </b-step-item>
       <b-step-item label="Mount" icon="hdd"><DriveMount /></b-step-item>
-      <b-step-item label="Launch" icon="rocket"></b-step-item>
+      <b-step-item label="Launch" icon="rocket"><Launch /></b-step-item>
       <template
         v-if="customNavigation"
         slot="navigation"
@@ -49,6 +49,7 @@
 // import { mapGetters } from 'vuex';
 import ImagesList from '../components/ImagesList.vue';
 import DriveMount from '../components/DriveMount.vue';
+import Launch from '../components/Launch.vue';
 
 export default {
   name: 'startup-flow',
@@ -73,7 +74,8 @@ export default {
   },
   components: {
     ImagesList,
-    DriveMount
+    DriveMount,
+    Launch
   }
 };
 </script>
