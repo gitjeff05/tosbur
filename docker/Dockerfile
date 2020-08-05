@@ -17,6 +17,11 @@ USER ${NB_USER}
 
 RUN pip install --no-cache-dir -r ${REQ}
 
+# TODO: Add nltk
+# RUN python -m pip install --upgrade-strategy only-if-needed nltk==3.5 && \
+#    python -m nltk.downloader punkt && \
+#    python -m nltk.downloader wordnet
+
 EXPOSE 8888
 
-CMD [ "jupyter", "notebook", "--ip=0.0.0.0", "--port=8888" ]
+CMD [ "jupyter", "lab", "--ip=0.0.0.0", "--port=8888" ]
