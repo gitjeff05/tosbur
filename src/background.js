@@ -1,10 +1,7 @@
 'use strict';
 const path = require('path');
 import { app, protocol, BrowserWindow, BrowserView, ipcMain } from 'electron';
-import {
-  createProtocol,
-  installVueDevtools
-} from 'vue-cli-plugin-electron-builder/lib';
+import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -46,7 +43,7 @@ async function createWindow() {
     win.setBrowserView(view);
     let [width, height] = win.getSize();
     console.log(width, height);
-    view.setBounds({ x: 1, y: 50, width: width - 20, height: height - 600 });
+    view.setBounds({ x: 1, y: 50, width: width - 20, height: height });
     const args = JSON.parse(arg);
     console.log(args.ip);
     view.webContents.loadURL(args.ip);
@@ -65,7 +62,7 @@ async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
-    if (!process.env.IS_TEST) win.webContents.openDevTools();
+    // if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol('app');
     // Load the index.html when not in development
@@ -106,11 +103,11 @@ app.on('ready', async () => {
     // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
     // If you are not using Windows 10 dark mode, you may uncomment these lines
     // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
-    try {
-      await installVueDevtools();
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString());
-    }
+    // try {
+    //   await installVueDevtools();
+    // } catch (e) {
+    //   console.error('Vue Devtools failed to install:', e.toString());
+    // }
   }
   createWindow();
 });

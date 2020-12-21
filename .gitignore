@@ -26,3 +26,4 @@ pnpm-debug.log*
 
 # presentation materials (XD)
 presentation/
+vs.code-workspace
